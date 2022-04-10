@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>AWS SDK for JavaScript - Browser Getting Started Application</title>
+  </head>
+
+<style>
+*{
+    font-family: sans-serif;
+}
+    #textToSynth{
+        width: 50%;
+        margin: 60px 25%;
+        text-align: center;
+    }
+    #voiceid{
+        border: 1px solid grey;
+        width: 70%;
+        margin: 0 15%;
+        background: white;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    #textEntry{
+        border: 1px solid grey;
+        background: white;
+        width: 70%;
+        margin: 0 15%;
+        height: 150px;
+        padding: 10px 15px;
+        box-sizing: border-box;
+        /*word-spacing: 5px;*/
+        font-size: 14px;
+    }
+    .btn{
+        border: 1px solid grey;
+        padding: 10px 20px;
+        font-size: 17px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+</style>
+
+  <body>
+    <div id="textToSynth">
+        <select id="voiceid">
+            <option value="Camila">Camila NEURAL - PT(BR)</option>
+            <option value="Vitoria">Vitoria - PT(BR)</option>
+            <option value="Ricardo">Ricardo - PT(BR)</option>
+            
+
+            <option value="Amy">English (British) (en-GB) Amy - Female</option>
+            <option value="Emma">English (British) (en-GB) Emma - Female</option>
+            <option value="Brian">English (British) (en-GB) Brian - Male</option>
+
+            <option value="Joanna">English (US) (en-US) Joanna - Female</option>
+            <option value="Kendra">English (US) (en-US) Kendra - Female</option>
+            <option value="Kimberly">English (US) (en-US) Kimberly - Female</option>
+            <option value="Salli">English (US) (en-US) Salli - Female</option>
+            <option value="Joey">English (US) (en-US) Joey - Male</option>
+            <option value="Justin">English (US) (en-US) Justin - Male (child)</option>
+            <!-- <option value="Kevin">English (US) (en-US) Kevin - Male (child)</option> -->
+            <option value="Ivy">English (US) (en-US) Ivy - Female (child)</option>
+            <option value="Matthew">English (US) (en-US) Matthew - Male</option>
+           
+        </select><br><br>
+
+        <textarea id="textEntry">Quando solicitados a avaliar a importância desses mesmos fatores para o próximo ano, três das seis métricas subiram claramente ao topo: receita, satisfação e esforço do cliente. Asim Zaheer, diretor de marketing da Glassbox, apontou que essa mudança pode resolver algumas ineficiências invisíveis na experiência atual de uma organização. “Os clientes podem não ter desafios interagindo com você, você pode não notar um problema relacionado à satisfação do cliente, mas ainda pode deixar dinheiro na mesa por não fornecer uma experiência perfeita, suave ou rápida”, disse Zaheer.</textarea>
+        <br><br>
+        <!-- <input autofocus size="23" type="text"  value=""/> -->
+        <button class="btn default" onClick="speakText()">Synthesize</button>
+
+        <p id="result">Enter text above then click Synthesize</p>
+        <audio id="audioPlayback"  controls>
+          <source id="audioSource" type="audio/mp3" src="">
+        </audio>
+
+    </div>
+
+
+
+    <!-- (script elements go here) -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.958.0.min.js"></script>
+    <script type="text/javascript">
+
+        // Initialize the Amazon Cognito credentials provider
+        AWS.config.region = 'ap-south-1';
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityPoolId: 'ap-south-1:84e72620-c5b5-4d8a-95a0-5671e06bdb09'});
+
+        // Function invoked by button click
+        function speakText() {
+            // Create the JSON parameters for getSynthesizeSpeechUrl
+            var speechParams = {
+                OutputFormat: "mp3",
+                SampleRate: "16000",
+                Text: "",
+                TextType: "text",
+                VoiceId: "Raveena"
+            };
+            speechParams.Text = document.getElementById("textEntry").value;
+            speechParams.VoiceId = document.getElementById("voiceid").value;
+            // Create the Polly service object and presigner object
+            var polly = new AWS.Polly({apiVersion: '2016-06-10'});
+            var signer = new AWS.Polly.Presigner(speechParams, polly)
+
+            // Create presigned URL of synthesized speech file
+            signer.getSynthesizeSpeechUrl(speechParams, function(error, url) {
+                if (error) {
+                    document.getElementById('result').innerHTML = error;
+                } else {
+                    document.getElementById('audioSource').src = url;
+                    document.getElementById('audioPlayback').load();
+                    document.getElementById('result').innerHTML = "Speech ready to play.";
+                    document.getElementById('audioPlayback').play();
+                }
+            });
+        }
+    </script>
+
+ </body>
+</html>
